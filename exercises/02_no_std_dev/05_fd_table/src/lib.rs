@@ -48,7 +48,7 @@ pub trait File: Send + Sync {
 
 /// File descriptor table
 pub struct FdTable {
-    // TODO: Design the internal structure
+    entries: Vec<Option<Arc<dyn File>>>
     // Hint: use Vec<Option<Arc<dyn File>>>
     //       the index is the fd number, None means the fd is closed or unallocated
 }
@@ -57,7 +57,7 @@ impl FdTable {
     /// Create an empty fd table
     pub fn new() -> Self {
         // TODO
-        todo!()
+                Self { entries: Vec::new() }
     }
 
     /// Allocate a new fd, return the fd number.
@@ -65,25 +65,25 @@ impl FdTable {
     /// Prefers reusing the smallest closed fd number; if no free slot, appends to the end.
     pub fn alloc(&mut self, file: Arc<dyn File>) -> usize {
         // TODO
-        todo!()
+                if let Some((i,e))=self.entries.iter_mut().enumerate().find(|(_,e)| e.is_none()) { *e=Some(file); i } else { self.entries.push(Some(file)); self.entries.len()-1 }
     }
 
     /// Get the file object for an fd. Returns None if the fd doesn't exist or is closed.
     pub fn get(&self, fd: usize) -> Option<Arc<dyn File>> {
         // TODO
-        todo!()
+                self.entries.get(fd).and_then(|e| e.as_ref().map(Arc::clone))
     }
 
     /// Close an fd. Returns true on success, false if the fd doesn't exist or is already closed.
     pub fn close(&mut self, fd: usize) -> bool {
         // TODO
-        todo!()
+                if let Some(e)=self.entries.get_mut(fd) { if e.is_some() { *e=None; return true; } } false
     }
 
     /// Return the number of currently allocated fds (excluding closed ones)
     pub fn count(&self) -> usize {
         // TODO
-        todo!()
+                self.entries.iter().filter(|e| e.is_some()).count()
     }
 }
 
